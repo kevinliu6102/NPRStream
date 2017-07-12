@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -13,31 +7,9 @@ import {
   Button,
   Linking,
 } from 'react-native';
+import { parseAuthCode } from './utils';
 
-export default class NPRStream extends Component {
-  componentDidMount() {
-    Linking.getInitialURL()
-      .then(event => this.handleOpenURL(event))
-      .catch(console.error);
-    Linking.addEventListener('url', this.handleOpenURL);
-  }
-
-  handleOpenURL(event) {
-    console.log('open url', event);
-    
-  }
-  
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Button title="HI THERE"/>
-      </View>
-    );
-  }
-}
+require('dotenv').config();
 
 const styles = StyleSheet.create({
   container: {
@@ -57,5 +29,49 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+export default class NPRStream extends Component {
+  constructor() {
+    super();
+    this.state = {
+      authCode: null,
+    };
+    this.handleOpenURL = this.handleOpenURL.bind(this);
+    this.handleLogin = this.handleLogin.bind(this);
+  }
+
+  componentDidMount() {
+    Linking.getInitialURL()
+      .then(url => this.handleOpenURL(url))
+      .catch(err => console.error('Error getting initial URL:', err));
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+
+  handleOpenURL(url) {
+    if (url) {
+      const authCode = parseAuthCode(url);
+      console.log('auth code is', authCode);
+      this.setState({ authCode });
+    }
+  }
+
+  handleLogin() { // eslint-disable-line class-methods-use-this
+    Linking.openURL(`https://api.npr.org/authorization/v2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=nprstream%3A%2F%2Fhome&response_type=code&scope=identity.readonly&state=asdf`);
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.welcome}>
+          Welcome to React Native!
+        </Text>
+        <Button
+          title="Login to NPR"
+          onPress={this.handleLogin}
+        />
+      </View>
+    );
+  }
+}
 
 AppRegistry.registerComponent('NPRStream', () => NPRStream);
