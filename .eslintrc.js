@@ -6,6 +6,7 @@ module.exports = {
         "import"
     ],
     "rules": {
-        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "jsx-a11y/href-no-hash": "off"
     }
 };
