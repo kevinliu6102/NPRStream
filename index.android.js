@@ -7,9 +7,8 @@ import {
   Button,
   Linking,
 } from 'react-native';
+import { CLIENT_ID } from 'react-native-dotenv';
 import { extractQuery, parseAuthCode } from './utils';
-
-require('dotenv').config();
 
 const styles = StyleSheet.create({
   container: {
@@ -63,7 +62,7 @@ export default class NPRStream extends Component {
   }
 
   handleLogin() { // eslint-disable-line class-methods-use-this
-    Linking.openURL(`https://api.npr.org/authorization/v2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=nprstream%3A%2F%2Fhome&response_type=code&scope=identity.readonly&state=asdf`);
+    Linking.openURL(`https://api.npr.org/authorization/v2/authorize?client_id=${CLIENT_ID}&redirect_uri=nprstream%3A%2F%2Fhome&response_type=code&scope=identity.readonly&state=asdf`);
   }
 
   render() {
