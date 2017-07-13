@@ -1,7 +1,9 @@
-const qs = require('qs');
+import qs from 'query-string';
 
-export const parseAuthCode = (url) => {
-  const { code } = qs.parse(url);
+export const extractQuery = url => qs.extract(url);
+
+export const parseAuthCode = (query) => {
+  const { code } = qs.parse(query);
   return code;
 };
 
