@@ -7,7 +7,7 @@ import {
   Button,
   Linking,
 } from 'react-native';
-import { parseAuthCode } from './utils';
+import { extractQuery, parseAuthCode } from './utils';
 
 require('dotenv').config();
 
@@ -47,9 +47,16 @@ export default class NPRStream extends Component {
     Linking.addEventListener('url', this.handleOpenURL);
   }
 
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.state.authCode !== null && this.state.authCode !== prevState.authCode) {
+  //     this.requestTokens(this.state.authCode);
+  //   }
+  // }
+
   handleOpenURL(url) {
     if (url) {
-      const authCode = parseAuthCode(url);
+      const query = extractQuery(url);
+      const authCode = parseAuthCode(query);
       console.log('auth code is', authCode);
       this.setState({ authCode });
     }

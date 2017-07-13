@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest -o",
+    "test": "jest",
     "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.js": [
       "eslint --fix",
-      "jest -o",
+      "npm test",
       "git add"
     ]
   },
