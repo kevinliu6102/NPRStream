@@ -4,18 +4,19 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest",
+    "test": "jest -o",
     "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.js": [
       "eslint --fix",
+      "jest -o",
       "git add"
     ]
   },
   "dependencies": {
     "dotenv": "^4.0.0",
-    "qs": "^6.5.0",
+    "query-string": "^4.3.4",
     "react": "16.0.0-alpha.12",
     "react-native": "0.46.1"
   },
