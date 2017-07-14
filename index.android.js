@@ -6,9 +6,12 @@ import {
   View,
   Button,
   Linking,
+  AsyncStorage,
 } from 'react-native';
-import { CLIENT_ID } from 'react-native-dotenv';
-import { extractQuery, parseAuthCode } from './utils';
+import qs from 'query-string';
+import { CLIENT_ID, SECRET } from 'react-native-dotenv';
+import { convertToTimeStamp } from './utils';
+import { tokenAxios } from './axiosInst';
 
 const styles = StyleSheet.create({
   container: {
@@ -32,32 +35,67 @@ const styles = StyleSheet.create({
 export default class NPRStream extends Component {
   constructor() {
     super();
+
     this.state = {
       authCode: null,
+      token: null,
+      expire: null,
     };
     this.handleOpenURL = this.handleOpenURL.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
   }
 
   componentDidMount() {
+    AsyncStorage.getItem('tokenInfo')
+      .then((tokenInfo) => {
+        if (tokenInfo) {
+          const values = JSON.parse(tokenInfo);
+          console.log('values', values);
+          this.setState({
+            token: values.access_token,
+            expire: values.expires_in,
+          });
+        }
+      })
+      .catch(err => console.log(err));
+
     Linking.getInitialURL()
-      .then(url => this.handleOpenURL(url))
+      .then(event => this.handleOpenURL(event))
       .catch(err => console.error('Error getting initial URL:', err));
     Linking.addEventListener('url', this.handleOpenURL);
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.state.authCode !== null && this.state.authCode !== prevState.authCode) {
-  //     this.requestTokens(this.state.authCode);
-  //   }
-  // }
+  componentDidUpdate(prevProps, prevState) {
+    console.log('updated, state is', this.state, prevState);
+    if (this.state.authCode !== null && this.state.authCode !== prevState.authCode) {
+      this.requestTokens(this.state.authCode);
+    }
+  }
 
-  handleOpenURL(url) {
-    if (url) {
-      const query = extractQuery(url);
-      const authCode = parseAuthCode(query);
-      console.log('auth code is', authCode);
-      this.setState({ authCode });
+  requestTokens(authCode) {
+    const params = qs.stringify({
+      grant_type: 'authorization_code',
+      client_id: CLIENT_ID,
+      client_secret: SECRET,
+      code: authCode,
+      redirect_uri: 'nprstream://home',
+    });
+    tokenAxios.post('https://api.npr.org/authorization/v2/token', params, {
+      headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+    })
+      .then(({ data }) => {
+        data.expires_in = convertToTimeStamp(data.expires_in); // eslint-disable-line
+        this.setState({ token: data.access_token, expire: data.expires_in });
+        AsyncStorage.setItem('tokenInfo', JSON.stringify(data)).catch(err => console.error(err));
+      })
+      .catch(err => console.log(err));
+  }
+
+  handleOpenURL(event) {
+    if (event && event.url) {
+      const query = qs.extract(event.url);
+      const values = qs.parse(query);
+      this.setState({ authCode: values.code });
     }
   }
 
@@ -67,7 +105,11 @@ export default class NPRStream extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      this.state.token && new Date() < this.state.expire
+      ? <View>
+        <Text>Logged in</Text>
+      </View>
+      : <View style={styles.container}>
         <Text style={styles.welcome}>
           Welcome to React Native!
         </Text>
