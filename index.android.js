@@ -43,6 +43,7 @@ export default class NPRStream extends Component {
     };
     this.handleOpenURL = this.handleOpenURL.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
   componentDidMount() {
@@ -80,6 +81,7 @@ export default class NPRStream extends Component {
       code: authCode,
       redirect_uri: 'nprstream://home',
     });
+
     tokenAxios.post('https://api.npr.org/authorization/v2/token', params, {
       headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
     })
@@ -100,7 +102,16 @@ export default class NPRStream extends Component {
   }
 
   handleLogin() { // eslint-disable-line class-methods-use-this
-    Linking.openURL(`https://api.npr.org/authorization/v2/authorize?client_id=${CLIENT_ID}&redirect_uri=nprstream%3A%2F%2Fhome&response_type=code&scope=identity.readonly&state=asdf`);
+    Linking.openURL(`https://api.npr.org/authorization/v2/authorize?client_id=${CLIENT_ID}&redirect_uri=nprstream%3A%2F%2Fhome&response_type=code&scope=listening.readonly&state=asdf`);
+  }
+
+  handleLogout() {
+    AsyncStorage.removeItem('tokenInfo');
+    this.setState({
+      authCode: null,
+      token: null,
+      expire: null,
+    });
   }
 
   render() {
@@ -108,6 +119,10 @@ export default class NPRStream extends Component {
       this.state.token && new Date() < this.state.expire
       ? <View>
         <Text>Logged in</Text>
+        <Button
+          title="Logout"
+          onPress={this.handleLogout}
+        />
       </View>
       : <View style={styles.container}>
         <Text style={styles.welcome}>
