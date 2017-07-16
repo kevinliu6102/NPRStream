@@ -20,6 +20,8 @@ class MediaView extends Component {
 
     this.getRecommendations = this.getRecommendations.bind(this);
     this.playCurrTrack = this.playCurrTrack.bind(this);
+    this.handleBtnPress = this.handleBtnPress.bind(this);
+    this.handlePlay = this.handlePlay.bind(this);
   }
 
   componentDidMount() {
@@ -71,13 +73,24 @@ class MediaView extends Component {
 
   playCurrTrack(currTrack) {
     console.log(currTrack.getDuration());
-    currTrack.play((success) => {
-      if (success && this.state.index < this.state.recommendations.length - 1) {
-        this.changeTrack();
-      } else {
-        console.log('Failed to play audio');
-      }
-    });
+    currTrack.play(this.handlePlay);
+  }
+
+  handlePlay(success) {
+    if (success && this.state.index < this.state.recommendations.length - 1) {
+      this.changeTrack();
+    } else {
+      console.log('Failed to play audio');
+    }
+  }
+
+  handleBtnPress() {
+    this.setState({ paused: !this.state.paused });
+    if (this.state.paused) {
+      this.playCurrTrack(this.state.currTrack);
+    } else {
+      this.state.currTrack.pause();
+    }
   }
 
   render() {
@@ -85,6 +98,7 @@ class MediaView extends Component {
       <View>
         <Button
           title={this.state.paused ? 'Play' : 'Pause'}
+          onPress={this.handleBtnPress}
         />
       </View>
     );
