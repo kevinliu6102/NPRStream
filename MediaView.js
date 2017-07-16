@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   View,
-  Text,
+  Button,
 } from 'react-native';
 import axios from 'axios';
 import Sound from 'react-native-sound';
@@ -13,12 +13,13 @@ class MediaView extends Component {
 
     this.state = {
       recommendations: null,
-      currSong: null,
+      currTrack: null,
       index: 0,
+      paused: false,
     };
 
     this.getRecommendations = this.getRecommendations.bind(this);
-    this.playCurrSong = this.playCurrSong.bind(this);
+    this.playCurrTrack = this.playCurrTrack.bind(this);
   }
 
   componentDidMount() {
@@ -28,17 +29,17 @@ class MediaView extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const notHaveSong = this.state.currSong === null;
+    const notHaveTrack = this.state.currTrack === null;
     const recommendationsChanged = prevState.recommendations !== this.state.recommendations;
     // Condition to start playing
-    if (notHaveSong && recommendationsChanged) {
-      this.changeSong();
+    if (notHaveTrack && recommendationsChanged) {
+      this.changeTrack();
     }
   }
 
   componentWillUnmount() {
-    if (this.state.currSong) {
-      this.state.currSong.release();
+    if (this.state.currTrack) {
+      this.state.currTrack.release();
     }
   }
 
@@ -55,31 +56,35 @@ class MediaView extends Component {
       .catch(err => console.error('Error fetching recs:', err));
   }
 
-  changeSong() {
+  changeTrack() {
     const uri = this.state.recommendations[this.state.index].links.audio[0].href;
-    const currSong = new Sound(uri, Sound.MAIN_BUNDLE, (err) => {
+    const currTrack = new Sound(uri, Sound.MAIN_BUNDLE, (err) => {
       if (err) {
-        console.log('Song error:', err);
+        console.log('Track error:', err);
       } else {
-        this.playCurrSong(currSong);
+        console.log('Playing next track');
+        this.playCurrTrack(currTrack);
       }
     });
-    this.setState({ currSong, index: this.state.index + 1 });
+    this.setState({ currTrack, index: this.state.index + 1 });
   }
 
-  playCurrSong(currSong) {
-    console.log(currSong.getDuration());
-    currSong.play((success) => {
-      console.log(success);
-      console.log(success ? 'Successful' : 'Fail');
+  playCurrTrack(currTrack) {
+    console.log(currTrack.getDuration());
+    currTrack.play((success) => {
+      if (success && this.state.index < this.state.recommendations.length - 1) {
+        this.changeTrack();
+      } else {
+        console.log('Failed to play audio');
+      }
     });
   }
 
   render() {
     return (
       <View>
-        <Text
-          title="Logged In"
+        <Button
+          title={this.state.paused ? 'Play' : 'Pause'}
         />
       </View>
     );
