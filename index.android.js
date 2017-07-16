@@ -26,11 +26,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 10,
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
 });
 
 export default class NPRStream extends Component {
@@ -116,7 +111,7 @@ export default class NPRStream extends Component {
   render() {
     return (
       this.state.token && new Date() < this.state.expire
-      ? <View>
+      ? <View style={styles.container}>
         <MediaView
           token={this.state.token}
         />
@@ -127,7 +122,7 @@ export default class NPRStream extends Component {
       </View>
       : <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
+          Tap below to login and listen to NPR.
         </Text>
         <Button
           title="Login to NPR"

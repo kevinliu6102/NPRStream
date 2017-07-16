@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  View,
   Button,
 } from 'react-native';
 import axios from 'axios';
@@ -95,12 +94,10 @@ class MediaView extends Component {
 
   render() {
     return (
-      <View>
-        <Button
-          title={this.state.paused ? 'Play' : 'Pause'}
-          onPress={this.handleBtnPress}
-        />
-      </View>
+      <Button
+        title={this.state.paused ? 'Play' : 'Pause'}
+        onPress={this.handleBtnPress}
+      />
     );
   }
 }
