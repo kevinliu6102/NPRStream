@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import qs from 'query-string';
 import { CLIENT_ID, SECRET } from 'react-native-dotenv';
+import MediaView from './MediaView';
 import { convertToTimeStamp } from './utils';
 import { tokenAxios } from './axiosInst';
 
@@ -51,7 +52,6 @@ export default class NPRStream extends Component {
       .then((tokenInfo) => {
         if (tokenInfo) {
           const values = JSON.parse(tokenInfo);
-          console.log('values', values);
           this.setState({
             token: values.access_token,
             expire: values.expires_in,
@@ -67,7 +67,6 @@ export default class NPRStream extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log('updated, state is', this.state, prevState);
     if (this.state.authCode !== null && this.state.authCode !== prevState.authCode) {
       this.requestTokens(this.state.authCode);
     }
@@ -118,7 +117,9 @@ export default class NPRStream extends Component {
     return (
       this.state.token && new Date() < this.state.expire
       ? <View>
-        <Text>Logged in</Text>
+        <MediaView
+          token={this.state.token}
+        />
         <Button
           title="Logout"
           onPress={this.handleLogout}
